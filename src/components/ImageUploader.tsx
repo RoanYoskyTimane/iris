@@ -1,65 +1,73 @@
 import React, { useState, useRef } from 'react';
+import { imageService } from '../api/imageService';
 import './ImageUploader.css';
 
-// Added interface for the props
 interface ImageUploaderProps {
-  onFileSelect: (file: File) => void;
+  onSuccess: () => void;
 }
 
-export default function ImageUploader({ onFileSelect }: ImageUploaderProps) {
-  const [isDragging, setIsDragging] = useState(false);
+export default function ImageUploader({ onSuccess }: ImageUploaderProps) {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setIsDragging(true);
-    } else if (e.type === "dragleave") {
-      setIsDragging(false);
-    }
+  const handleFileChange = (file: File) => {
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-    
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      onFileSelect(file); // Passing the file to the Dashboard
-    }
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      onFileSelect(e.target.files[0]); // Passing the file to the Dashboard
+  const handleUploadSubmit = async () => {
+    if (!selectedFile) return;
+    setUploading(true);
+    try {
+      await imageService.upload(selectedFile);
+      setPreviewUrl(null);
+      setSelectedFile(null);
+      onSuccess(); // Triggers gallery refresh and view change
+    } catch (err) {
+      alert("Upload failed. Check console for details.");
+    } finally {
+      setUploading(false);
     }
   };
 
   return (
-    <div className="uploader-container">
-      <div 
-        className={`drop-zone ${isDragging ? 'dragging' : ''}`}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <div className="upload-icon">↑</div>
-        <h3>Click or drag image here</h3>
-        <p>Supports PNG, JPG, WebP up to 20MB</p>
-        
-        <input 
-          type="file" 
-          hidden 
-          ref={fileInputRef} 
-          onChange={handleFileSelect}
-          accept="image/*"
-        />
-        
-        <button className="select-btn">Select File</button>
+    <div className="uploader-wrapper">
+      <div className="uploader-container">
+        {/* Only show Dropzone if no file is selected yet */}
+        {!previewUrl ? (
+          <div 
+            className="drop-zone"
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (e.dataTransfer.files?.[0]) handleFileChange(e.dataTransfer.files[0]);
+            }}
+          >
+            <div className="upload-icon">↑</div>
+            <h3>Click or drag image here</h3>
+            <p>Supports PNG, JPG, WebP</p>
+            <input type="file" hidden ref={fileInputRef} accept="image/*" 
+              onChange={(e) => e.target.files?.[0] && handleFileChange(e.target.files[0])} />
+          </div>
+        ) : (
+          <div className="preview-container">
+            <img src={previewUrl} alt="Preview" />
+            <div className="upload-actions">
+              <button className="confirm-btn" onClick={handleUploadSubmit} disabled={uploading}>
+                {uploading ? "Uploading..." : "Confirm Upload"}
+              </button>
+              <button 
+                style={{background: 'none', border: 'none', color: '#888', cursor: 'pointer'}} 
+                onClick={() => setPreviewUrl(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
