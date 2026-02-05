@@ -54,7 +54,7 @@ export default function TransformSettings({ onProcess }: { onProcess: (data: any
       </div>
 
       <button className="process-btn" onClick={handleSubmit}>
-        Process Image ⚡
+        Process Image
       </button>
     </div>
   );

@@ -66,7 +66,7 @@ export default function Dashboard() {
         )}
 
         {view === "upload" && (
-          <ImageUploader onFileSelect={(file) => console.log("Upload logic here", file)} />
+          <ImageUploader onSuccess={loadGallery} />
         )}
 
         {view === "edit" && selectedId && (

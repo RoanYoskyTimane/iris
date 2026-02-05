@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { imageService } from '../api/imageService';
 import './ImageUploader.css';
 
@@ -24,7 +24,7 @@ export default function ImageUploader({ onSuccess }: ImageUploaderProps) {
       await imageService.upload(selectedFile);
       setPreviewUrl(null);
       setSelectedFile(null);
-      onSuccess(); // Triggers gallery refresh and view change
+      onSuccess(); 
     } catch (err) {
       alert("Upload failed. Check console for details.");
     } finally {
@@ -35,7 +35,6 @@ export default function ImageUploader({ onSuccess }: ImageUploaderProps) {
   return (
     <div className="uploader-wrapper">
       <div className="uploader-container">
-        {/* Only show Dropzone if no file is selected yet */}
         {!previewUrl ? (
           <div 
             className="drop-zone"
