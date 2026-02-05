@@ -1,6 +1,6 @@
 import "../App.css";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api/axios";
+import api from "../api/client";
 import { useState, type FormEvent } from "react";
 
 
@@ -14,11 +14,10 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      const response = await api.post("/login", {
-        username,
-        password,
-      });
-
+      const response = await api.post("/auth/login", {
+      username,
+      password,
+    });
       const {token, userDto} = response.data;
 
       localStorage.setItem("token", token);

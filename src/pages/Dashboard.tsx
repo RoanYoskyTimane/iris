@@ -1,72 +1,79 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { imageService } from "../api/imageService";
 import Navbar from "../components/Navbar";
+import ImageCard from "../components/ImageCard";
 import ImageUploader from "../components/ImageUploader";
 import TransformSettings from "../components/TransformSettings";
-import ImageCropper from "../components/ImageCropper";
-import api from "../api/axios";
-import "../App.css"
+import "./Dashboard.css";
+
+type ViewMode = "list" | "upload" | "edit";
 
 export default function Dashboard() {
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [cropData, setCropData] = useState<any>(null);
+  const [view, setView] = useState<ViewMode>("list");
+  const [images, setImages] = useState<any[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Function to handle image selection from Uploader
-  const handleImageSelect = (file: File) => {
-    setImageFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
-  };
-
-  // The missing onProcess handler
-  const handleTransformRequest = async (settings: any) => {
-    if (!imageFile) return alert("Please upload an image first");
-
-    // Combine settings with crop data for your backend JSON
-    const fullPayload = {
-      transformations: {
-        ...settings.transformations,
-        crop: cropData ? {
-          width: Math.round(cropData.width),
-          height: Math.round(cropData.height),
-          x: Math.round(cropData.x),
-          y: Math.round(cropData.y)
-        } : null
-      }
-    };
-
+  const loadGallery = async () => {
+    setLoading(true);
     try {
-      console.log("Sending to backend:", fullPayload);
-      // Example: await api.post(`/images/UPLOAD_ID/transform`, fullPayload);
-      alert("Transformation request sent!");
+      const data = await imageService.getAll(0, 10);
+      setImages(data.content);
+      setView("list");
     } catch (err) {
-      console.error("Backend error:", err);
+      console.error("Gallery load failed", err);
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    loadGallery();
+  }, []);
+
+  const handleTransform = (id: string) => {
+    setSelectedId(id);
+    setView("edit");
+  };
+
   return (
-    <div className="dashboard-page">
+    <div className="dashboard-container">
       <Navbar />
-      <main className="dashboard-content" style={{ padding: "0 20px" }}>
-        <div style={{ textAlign: "center", marginTop: "40px" }}>
-          <h1 style={{ fontSize: "32px", fontWeight: "800" }}>
-            Transform your images <span style={{ color: "#FD8A6B" }}>instantly.</span>
-          </h1>
-        </div>
+      
+      <div className="dashboard-menu">
+        <button 
+          className={view === "list" ? "active" : ""} 
+          onClick={() => setView("list")}
+        >
+          Gallery
+        </button>
+        <button 
+          className={view === "upload" ? "active" : ""} 
+          onClick={() => setView("upload")}
+        >
+          Upload
+        </button>
+      </div>
 
-        {/* 1. Upload Section */}
-        {!previewUrl && <ImageUploader onFileSelect={handleImageSelect} />}
-
-        {/* 2. Cropping Section (Visible only after upload) */}
-        {previewUrl && (
-          <ImageCropper 
-            image={previewUrl} 
-            onCropComplete={(pixels) => setCropData(pixels)} 
-          />
+      <main className="dashboard-content">
+        {view === "list" && (
+          <div className="image-grid">
+            {images.map((img) => (
+              <ImageCard key={img.id} img={img} onEdit={handleTransform} />
+            ))}
+            {images.length === 0 && !loading && <p>No images found. Start by uploading one!</p>}
+          </div>
         )}
 
-        {/* 3. Settings Section (Visible only after upload) */}
-        {previewUrl && (
-          <TransformSettings onProcess={handleTransformRequest} />
+        {view === "upload" && (
+          <ImageUploader onFileSelect={(file) => console.log("Upload logic here", file)} />
+        )}
+
+        {view === "edit" && selectedId && (
+          <div className="editor-container">
+            <button className="back-link" onClick={() => setView("list")}>← Back to Gallery</button>
+            <TransformSettings onProcess={(data) => console.log("Transforming", selectedId, data)} />
+          </div>
         )}
       </main>
     </div>

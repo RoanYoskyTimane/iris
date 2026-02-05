@@ -1,7 +1,7 @@
 import "../App.css";
 import { Link , useNavigate} from "react-router-dom";
 import { useState, type FormEvent } from "react";
-import api from "../api/axios";
+import api from "../api/client";
 
 export default function Register() {
   const [username, setUsername] = useState("");
@@ -13,7 +13,7 @@ export default function Register() {
   const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const response = await api.post("/register", { username, password });
+      const response = await api.post("/auth/register", { username, password });
       const {token, userDto} = response.data;
 
       localStorage.setItem("token", token);
