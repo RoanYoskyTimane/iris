@@ -1,0 +1,42 @@
+.image-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  /* Add margin to ensure cards don't touch screen edges on mobile */
+  margin: 0 15px; 
+  transition: transform 0.2s;
+}
+
+/* Center the grid and add container-level margins */
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+  width: 100%;
+  max-width: 1200px; /* Limits width on large monitors */
+  margin: 0 auto; /* Centers the whole grid */
+  padding: 20px 0;
+}
+
+@media (max-width: 480px) {
+  .image-grid {
+    grid-template-columns: 1fr; /* Stack cards on mobile */
+  }
+}
+
+.delete-btn {
+  max-width: 100px;
+  background: #fff;
+  border: 1px solid #ff4d4f;
+  color: #ff4d4f;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-btn:hover {
+  background: #fff1f0;
+}
