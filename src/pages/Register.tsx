@@ -13,7 +13,7 @@ export default function Register() {
   const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const response = await api.post("/auth/register", { username, password });
+      const response = await api.post(import.meta.env.VITE_REGISTER, { username, password });
       const {token, userDto} = response.data;
 
       localStorage.setItem("token", token);
