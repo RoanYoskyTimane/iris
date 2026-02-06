@@ -12,9 +12,10 @@ export default function Login() {
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
+    localStorage.removeItem("token");
 
     try {
-      const response = await api.post("/auth/login", {
+      const response = await api.post(import.meta.env.VITE_LOGIN, {
       username,
       password,
     });
