@@ -4,7 +4,7 @@ import "./ImageCard.css";
 
 interface ImageCardProps {
   img: any;
-  onEdit: (id: string) => void;
+  onEdit: (img: any) => void;
 }
 
 export default function ImageCard({ img, onEdit }: ImageCardProps) {
@@ -27,7 +27,7 @@ export default function ImageCard({ img, onEdit }: ImageCardProps) {
   if (window.confirm("Are you sure you want to delete this image?")) {
     try {
       await imageService.deleteImage(img.id);
-      window.location.reload(); // Quick way to refresh gallery
+      window.location.reload();
     } catch (err) {
       alert("Failed to delete image");
     }
@@ -47,7 +47,7 @@ export default function ImageCard({ img, onEdit }: ImageCardProps) {
         <h4>{img.originalName}</h4>
         <p>{img.width} x {img.height} • {img.contentType.split('/')[1].toUpperCase()}</p>
         <div className="card-actions">
-          <button className="edit-btn" onClick={() => onEdit(img.id)}>
+          <button className="edit-btn" onClick={() => onEdit(img)}>
             Transform
           </button>
           <button 
