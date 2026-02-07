@@ -11,7 +11,7 @@ type ViewMode = "list" | "upload" | "edit";
 export default function Dashboard() {
   const [view, setView] = useState<ViewMode>("list");
   const [images, setImages] = useState<any[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadGallery = async () => {
@@ -31,10 +31,24 @@ export default function Dashboard() {
     loadGallery();
   }, []);
 
-  const handleTransform = (id: string) => {
-    setSelectedId(id);
-    setView("edit");
+  const handleTransform = async (img: any) => {
+    console.log("Received image object:", img);
+  
+    if (!img) return;
+
+    setLoading(true);
+    try {
+      const imageKey = img.r2Key; 
+      const url = await imageService.getSecureImageUrl(imageKey);
+      setSelectedUrl(url);
+      setView("edit");      
+    } catch (err) {
+      console.error("Failed to load image for editing", err);
+    } finally {
+    setLoading(false);
+    }
   };
+
 
   return (
     <div className="dashboard-container">
@@ -69,10 +83,10 @@ export default function Dashboard() {
           <ImageUploader onSuccess={loadGallery} />
         )}
 
-        {view === "edit" && selectedId && (
+        {view === "edit" && selectedUrl && (
           <div className="editor-container">
             <button className="back-link" onClick={() => setView("list")}>← Back to Gallery</button>
-            <TransformSettings onProcess={(data) => console.log("Transforming", selectedId, data)} />
+            <TransformSettings imageUrl={selectedUrl} onProcess={(data) => console.log("Transforming", data)} />
           </div>
         )}
       </main>
