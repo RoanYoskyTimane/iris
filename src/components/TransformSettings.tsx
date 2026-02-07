@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import './TransformSettings.css';
+import ImageCropper from './ImageCropper';
 
-export default function TransformSettings({ onProcess }: { onProcess: (data: any) => void }) {
+export default function TransformSettings({imageUrl, onProcess }: { imageUrl: string,onProcess: (data: any) => void }) {
   const [format, setFormat] = useState('png');
   const [filters, setFilters] = useState({ grayscale: false, sepia: false });
+  const [cropPixels, setCropPixels] = useState(null);
 
   const handleSubmit = () => {
     const payload = {
       transformations: {
         format: format,
-        filters: filters,
-        // Default values for now
+        crop: cropPixels,
+        resize: { width: 800, height: 600 }, 
         rotate: 0,
-        resize: { width: 800, height: 600 }
+        filters: filters
       }
     };
     onProcess(payload);
@@ -20,6 +22,7 @@ export default function TransformSettings({ onProcess }: { onProcess: (data: any
 
   return (
     <div className="settings-card">
+      <ImageCropper image={imageUrl} onCropComplete={setCropPixels} />
       <div className="settings-group">
         <label>Output Format</label>
         <div className="format-options">
@@ -36,7 +39,7 @@ export default function TransformSettings({ onProcess }: { onProcess: (data: any
       </div>
 
       <div className="settings-group">
-        <label>AI Enhancements</label>
+        <label>Filters</label>
         <div style={{ display: 'flex', gap: '20px' }}>
           <label style={{ fontWeight: 400 }}>
             <input 

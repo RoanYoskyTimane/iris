@@ -52,7 +52,7 @@ export default function ImageCard({ img, onEdit }: ImageCardProps) {
           </button>
           <button 
             className="download-btn" 
-            onClick={() => imageService.downloadImage(img.id)}
+            onClick={() => imageService.downloadImage(img.r2Key)}
           >
             Download
           </button>
