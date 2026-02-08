@@ -4,7 +4,7 @@ import apiClient from './client';
 export const imageService = {
     getAll: async (page = 0, limit = 10) => {
         const response = await apiClient.get(`/images?page=${page}&limit=${limit}`);
-        console.log("The response: "+response)
+        
         return response.data; 
     },
 
@@ -25,5 +25,38 @@ export const imageService = {
             },
         });
         return response.data;
+    },
+
+    downloadImage: async (key: string) => {
+        try {
+            // 1. Makes request the data as a blob
+            const response = await apiClient.get(`/images/${key}`, {
+                responseType: 'blob', 
+            });
+
+            // 2. Creates a URL for the blob
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            
+            // 3. Creates a temporary anchor element
+            const link = document.createElement('a');
+            link.href = url;
+            
+            // This forces the browser to download instead of navigate
+            link.setAttribute('download', key); 
+            
+            // 4. Append to body, click, and cleanup
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode?.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Download failed", error);
+            throw error;
+        }
+    },
+
+    deleteImage: async (key: string) => {
+        const response = await apiClient.delete(`/images/${key}`);
+        return response;
     }
 };
