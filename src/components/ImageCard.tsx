@@ -26,7 +26,7 @@ export default function ImageCard({ img, onEdit }: ImageCardProps) {
   const handleDelete = async () => {
   if (window.confirm("Are you sure you want to delete this image?")) {
     try {
-      await imageService.deleteImage(img.id);
+      await imageService.deleteImage(img.r2Key);
       window.location.reload();
     } catch (err) {
       alert("Failed to delete image");
@@ -57,8 +57,8 @@ export default function ImageCard({ img, onEdit }: ImageCardProps) {
             Download
           </button>
           <button className="delete-btn" onClick={handleDelete} title="Delete Image">
-  Delete
-</button>
+            Delete
+          </button>
         </div>
       </div>
     </div>
