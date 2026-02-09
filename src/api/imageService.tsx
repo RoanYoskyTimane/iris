@@ -58,5 +58,14 @@ export const imageService = {
     deleteImage: async (key: string) => {
         const response = await apiClient.delete(`/images/${key}`);
         return response;
+    },
+
+    transform: async (key: string, payload: any): Promise<string> => {
+        const response = await apiClient.post(`/images/${key}/transform`, payload, {
+            responseType: 'blob' // Essential for receiving the image data
+        });
+        
+        // Convert the result into a URL the browser can display
+        return URL.createObjectURL(response.data);
     }
 };
