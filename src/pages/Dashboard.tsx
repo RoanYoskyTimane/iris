@@ -12,6 +12,7 @@ export default function Dashboard() {
   const [view, setView] = useState<ViewMode>("list");
   const [images, setImages] = useState<any[]>([]);
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
+  const [key, setKey] = useState<string | null>(null)
   const [loading, setLoading] = useState(true);
 
   const loadGallery = async () => {
@@ -39,6 +40,7 @@ export default function Dashboard() {
     setLoading(true);
     try {
       const imageKey = img.r2Key; 
+      setKey(img.r2Key);
       const url = await imageService.getSecureImageUrl(imageKey);
       setSelectedUrl(url);
       setView("edit");      
@@ -83,10 +85,10 @@ export default function Dashboard() {
           <ImageUploader onSuccess={loadGallery} />
         )}
 
-        {view === "edit" && selectedUrl && (
+        {view === "edit" && selectedUrl && key && (
           <div className="editor-container">
             <button className="back-link" onClick={() => setView("list")}>← Back to Gallery</button>
-            <TransformSettings imageUrl={selectedUrl} onProcess={(data) => console.log("Transforming", data)} />
+            <TransformSettings r2Key={key} imageUrl={selectedUrl} />
           </div>
         )}
       </main>
