@@ -17,6 +17,7 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,32 +33,48 @@ import java.util.stream.Collectors;
 public class ImageService {
     private final ImageRepository imageRepository;
     private final ImageMapper imageMapper;
+    private final R2Service r2Service;
 
-    public List<ImageDto> getAllImages(){
-        return imageRepository.findAll().stream().map(imageMapper::toDto).collect(Collectors.toList());
+    public ImageDto uploadImage(MultipartFile file, Integer authenticatedUserId) throws IOException{
+        //1. Finding measurements
+        HashMap<String, Integer> measures = new HashMap<>();
+        measures = findingMeasurement(file);
+
+        // 2. Upload the raw file to Cloudflare R2 / S3 storage
+        String fileKey = r2Service.uploadFile(file);
+
+        // 3. Map file data and metadata to the Data Transfer Object (DTO)
+        ImageCreateDto imageCreateDto = new ImageCreateDto();
+        imageCreateDto.setOwner_id(authenticatedUserId);
+        imageCreateDto.setOriginalName(file.getOriginalFilename());
+        imageCreateDto.setR2Key(fileKey);
+        imageCreateDto.setContentType(file.getContentType());
+        imageCreateDto.setFileSize(file.getSize());
+        imageCreateDto.setWidth(measures.get("width"));
+        imageCreateDto.setHeight(measures.get("height"));
+
+        return createImage(imageCreateDto);
     }
 
-    public ImageDto getImageById(UUID id){
-        Image image = imageRepository.findById(id).orElseThrow(()->new RuntimeException("A imagem nao foi encontrada"+id));
-        return imageMapper.toDto(image);
+    public ImageDownloadDto downloadImage(String key){
+        byte[] imageData = r2Service.getFile(key);
+
+        MediaType mediaType = MediaType.IMAGE_JPEG; // Default
+        if (key.toLowerCase().endsWith(".png")) mediaType = MediaType.IMAGE_PNG;
+        if (key.toLowerCase().endsWith(".gif")) mediaType = MediaType.IMAGE_GIF;
+
+        return ImageDownloadDto.builder()
+                .imageData(imageData)
+                .mediaType(mediaType)
+                .build();
     }
+
 
     public ImageDto createImage(ImageCreateDto imageCreateDto){
         Image image = imageMapper.toEntity(imageCreateDto);
         imageRepository.save(image);
 
         return imageMapper.toDto(image);
-    }
-
-    public ImageDto updateImage(UUID id,ImageUpdateDto imageUpdateDto){
-        Image image = imageRepository.findById(id).orElseThrow(()->new RuntimeException("A imagem nao foi encontrada"+id));
-        imageMapper.updateDto(imageUpdateDto, image);
-        return imageMapper.toDto(imageRepository.save(image));
-    }
-
-    public void deleteImage(UUID id){
-        Image image = imageRepository.findById(id).orElseThrow(()-> new RuntimeException("A imagem nao foi encontrada"+id));
-        imageRepository.delete(image);
     }
 
     public HashMap<String, Integer> findingMeasurement (MultipartFile uploadFile){
@@ -106,7 +123,13 @@ public class ImageService {
     }
 
 
-    public ImageProcessingResult imageTransfomation(TransformDto transformDto, byte[]data){
+    public ImageProcessingResult imageTransfomation(String key, TransformRequest transformRequest){
+        //Extract the Transform Object Dto
+        TransformDto transformDto = transformRequest.getTransformations();
+
+        //1. Gets the original image from R2
+        byte[] data = r2Service.getFile(key);
+
         try{
             //1. Prepares the input and output streams
             ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
