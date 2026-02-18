@@ -17,11 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.HashMap;
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -40,24 +36,7 @@ public class ImageController {
         if (bucket.tryConsume(1))
         {
             try {
-                //1. Finding measurements
-                HashMap<String, Integer> measures = new HashMap<>();
-                measures = imageService.findingMeasurement(file);
-
-                // 2. Upload the raw file to Cloudflare R2 / S3 storage
-                String fileKey = r2Service.uploadFile(file);
-
-                // 3. Map file data and metadata to the Data Transfer Object (DTO)
-                ImageCreateDto imageCreateDto = new ImageCreateDto();
-                imageCreateDto.setOwner_id(currentUser.getId());
-                imageCreateDto.setOriginalName(file.getOriginalFilename());
-                imageCreateDto.setR2Key(fileKey);
-                imageCreateDto.setContentType(file.getContentType());
-                imageCreateDto.setFileSize(file.getSize());
-                imageCreateDto.setWidth(measures.get("width"));
-                imageCreateDto.setHeight(measures.get("height"));
-                // 4. Save metadata to the database and return the result
-                return ResponseEntity.ok(imageService.createImage(imageCreateDto));
+                return ResponseEntity.ok(imageService.uploadImage(file, currentUser.getId()));
             } catch (IOException e) {
                 return ResponseEntity.status(500).body("Upload failed: " + e.getMessage());
             }
@@ -69,28 +48,18 @@ public class ImageController {
 
     @GetMapping("/{key}")
     public ResponseEntity<byte[]> download(@PathVariable String key) {
-        byte[] data = r2Service.getFile(key);
-
-        // Determine the media type (e.g., image/jpeg, image/png)
-        MediaType mediaType = MediaType.IMAGE_JPEG; // Default
-        if (key.toLowerCase().endsWith(".png")) mediaType = MediaType.IMAGE_PNG;
-        if (key.toLowerCase().endsWith(".gif")) mediaType = MediaType.IMAGE_GIF;
+        ImageDownloadDto imageDownloadDto = imageService.downloadImage(key);
 
         return ResponseEntity.ok()
-                .contentType(mediaType) // CRITICAL: Tells the OS this is an image
+                .contentType(imageDownloadDto.getMediaType()) // CRITICAL: Tells the OS this is an image
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + key + "\"")
-                .body(data);
+                .body(imageDownloadDto.getImageData());
     }
 
     @PostMapping("/{key}/transform")
     public ResponseEntity<?> transformImage(@PathVariable String key, @RequestBody TransformRequest transformRequest){
-        //Extract the Transform Object Dto
-        TransformDto transformDto = transformRequest.getTransformations();
 
-        //1. Gets the original image from R2
-        byte[] data = r2Service.getFile(key);
-
-        ImageProcessingResult processedImage = imageService.imageTransfomation(transformDto, data);
+        ImageProcessingResult processedImage = imageService.imageTransfomation(key, transformRequest);
 
         //3. Returns the processed image
         return ResponseEntity.ok()
