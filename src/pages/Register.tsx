@@ -1,50 +1,101 @@
-import "../App.css";
-import { Link , useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, type FormEvent } from "react";
 import api from "../api/client";
+import { motion } from "framer-motion";
+import { UserPlus, Mail, Lock } from "lucide-react";
+import "./Auth.css";
 
 export default function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  
   const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
+
     try {
       const response = await api.post(import.meta.env.VITE_REGISTER, { username, password });
-      const {token, userDto} = response.data;
+      const { token } = response.data;
 
       localStorage.setItem("token", token);
       navigate("/dashboard");
     } catch (err: any) {
-      setError("Registration failed. Try a different username.");
+      setError("Registration failed. Please try a different username.");
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
     <div className="auth-container">
-      <div className="auth-card">
-        <h1>Create Account</h1>
-        <p>Join us and start uploading images</p>
+      <motion.div 
+        className="auth-card"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="auth-header">
+          <h1>Create Account</h1>
+          <p>Join us and start processing your images</p>
+        </div>
         
-        {error && <p style={{ color: "#FA5C5C", fontWeight: "bold" }}>{error}</p>}
+        {error && (
+          <motion.div 
+            className="error-message"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+          >
+            {error}
+          </motion.div>
+        )}
+
         <form onSubmit={handleRegister}>
           <div className="form-group">
-            <input className="input-field" type="email" placeholder="Email Address" value={username}
-              onChange={(e) => setUsername(e.target.value)} />
+            <div className="input-container">
+              <Mail className="input-icon" size={18} />
+              <input 
+                className="input-field" 
+                type="text" 
+                placeholder="Email or Username" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)} 
+                required
+              />
+            </div>
           </div>
+          
           <div className="form-group">
-            <input className="input-field" type="password" placeholder="Create Password" value={password}
-              onChange={(e) => setPassword(e.target.value)}/>
+            <div className="input-container">
+              <Lock className="input-icon" size={18} />
+              <input 
+                className="input-field" 
+                type="password" 
+                placeholder="Password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
           </div>
-          <button type="submit" className="auth-button">Register</button>
+
+          <button type="submit" className="auth-button" disabled={loading}>
+            {loading ? "Creating account..." : (
+              <>
+                <UserPlus size={18} style={{ marginRight: "8px", verticalAlign: "middle" }} />
+                <span>Register</span>
+              </>
+            )}
+          </button>
         </form>
 
         <div className="auth-footer">
           Already have an account? <Link to="/login" className="auth-link">Sign in</Link>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
