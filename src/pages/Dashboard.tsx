@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { LayoutGrid, Upload, ArrowLeft, Loader2, Image as ImageIcon } from "lucide-react";
 import { imageService } from "../api/imageService";
 import Navbar from "../components/Navbar";
 import ImageCard from "../components/ImageCard";
@@ -12,14 +14,14 @@ export default function Dashboard() {
   const [view, setView] = useState<ViewMode>("list");
   const [images, setImages] = useState<any[]>([]);
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
-  const [key, setKey] = useState<string | null>(null)
+  const [key, setKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadGallery = async () => {
     setLoading(true);
     try {
-      const data = await imageService.getAll(0, 10);
-      setImages(data.content);
+      const data = await imageService.getAll(0, 50); // Increased limit for better gallery view
+      setImages(data.content || []);
       setView("list");
     } catch (err) {
       console.error("Gallery load failed", err);
@@ -33,10 +35,7 @@ export default function Dashboard() {
   }, []);
 
   const handleTransform = async (img: any) => {
-    console.log("Received image object:", img);
-  
     if (!img) return;
-
     setLoading(true);
     try {
       const imageKey = img.r2Key; 
@@ -47,50 +46,109 @@ export default function Dashboard() {
     } catch (err) {
       console.error("Failed to load image for editing", err);
     } finally {
-    setLoading(false);
+      setLoading(false);
     }
   };
-
 
   return (
     <div className="dashboard-container">
       <Navbar />
       
-      <div className="dashboard-menu">
-        <button 
-          className={view === "list" ? "active" : ""} 
-          onClick={() => setView("list")}
-        >
-          Gallery
-        </button>
-        <button 
-          className={view === "upload" ? "active" : ""} 
-          onClick={() => setView("upload")}
-        >
-          Upload
-        </button>
+      <div className="dashboard-header">
+        <div className="dashboard-nav">
+          <button 
+            className={`nav-item ${view === "list" ? "active" : ""}`} 
+            onClick={() => setView("list")}
+          >
+            <LayoutGrid size={18} />
+            <span>Gallery</span>
+          </button>
+          <button 
+            className={`nav-item ${view === "upload" ? "active" : ""}`} 
+            onClick={() => setView("upload")}
+          >
+            <Upload size={18} />
+            <span>Upload</span>
+          </button>
+        </div>
       </div>
 
-      <main className="dashboard-content">
-        {view === "list" && (
-          <div className="image-grid">
-            {images.map((img) => (
-              <ImageCard key={img.id} img={img} onEdit={handleTransform} />
-            ))}
-            {images.length === 0 && !loading && <p>No images found. Start by uploading one!</p>}
-          </div>
-        )}
+      <main className="dashboard-main">
+        <AnimatePresence mode="wait">
+          {view === "list" && (
+            <motion.div 
+              key="list"
+              className="gallery-view"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="view-header">
+                <h2>Your Media Library</h2>
+                <p>{images.length} images stored</p>
+              </div>
 
-        {view === "upload" && (
-          <ImageUploader onSuccess={loadGallery} />
-        )}
+              {loading ? (
+                <div className="loading-state">
+                  <Loader2 className="spinner" size={40} />
+                  <p>Loading your gallery...</p>
+                </div>
+              ) : (
+                <div className="image-grid">
+                  {images.map((img) => (
+                    <ImageCard key={img.id} img={img} onEdit={handleTransform} />
+                  ))}
+                  {images.length === 0 && (
+                    <div className="empty-state">
+                      <ImageIcon size={48} />
+                      <h3>No images found</h3>
+                      <p>Start by uploading your first image to get started.</p>
+                      <button className="primary-btn" onClick={() => setView("upload")}>
+                        Upload Image
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          )}
 
-        {view === "edit" && selectedUrl && key && (
-          <div className="editor-container">
-            <button className="back-link" onClick={() => setView("list")}>← Back to Gallery</button>
-            <TransformSettings r2Key={key} imageUrl={selectedUrl} />
-          </div>
-        )}
+          {view === "upload" && (
+            <motion.div 
+              key="upload"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="view-header centered">
+                <h2>Upload New Image</h2>
+                <p>Add images to your library for processing</p>
+              </div>
+              <ImageUploader onSuccess={loadGallery} />
+            </motion.div>
+          )}
+
+          {view === "edit" && selectedUrl && key && (
+            <motion.div 
+              key="edit"
+              className="editor-view"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+            >
+              <div className="editor-nav">
+                <button className="back-link-btn" onClick={() => setView("list")}>
+                  <ArrowLeft size={18} />
+                  <span>Back to Library</span>
+                </button>
+                <div className="editor-title">
+                  <h2>Image Editor</h2>
+                </div>
+              </div>
+              <TransformSettings r2Key={key} imageUrl={selectedUrl} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );
