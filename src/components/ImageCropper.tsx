@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Cropper from 'react-easy-crop'
+import { ZoomIn, ZoomOut } from 'lucide-react'
 import './ImageCropper.css'
 
 interface CropperProps {
@@ -24,20 +25,31 @@ export default function ImageCropper({ image, onCropComplete, rotation }: Croppe
           onCropChange={setCrop}
           onCropComplete={(_, pixels) => onCropComplete(pixels)}
           onZoomChange={setZoom}
-          onRotationChange={() => {}}
+          style={{
+            containerStyle: {
+              borderRadius: 'var(--radius-lg)',
+            }
+          }}
         />
       </div>
-      <div className="controls">
-        <input
-          type="range"
-          value={zoom}
-          min={1}
-          max={3}
-          step={0.1}
-          aria-labelledby="Zoom"
-          onChange={(e) => setZoom(Number(e.target.value))}
-          className="zoom-range"
-        />
+      <div className="cropper-controls">
+        <div className="zoom-control">
+          <button className="zoom-btn" onClick={() => setZoom(Math.max(1, zoom - 0.1))}>
+            <ZoomOut size={16} />
+          </button>
+          <input
+            type="range"
+            value={zoom}
+            min={1}
+            max={3}
+            step={0.1}
+            onChange={(e) => setZoom(Number(e.target.value))}
+            className="zoom-range"
+          />
+          <button className="zoom-btn" onClick={() => setZoom(Math.min(3, zoom + 0.1))}>
+            <ZoomIn size={16} />
+          </button>
+        </div>
       </div>
     </div>
   )
