@@ -1,0 +1,110 @@
+/* App.css */
+:root {
+  --primary: #FD8A6B;
+  --primary-hover: #FA5C5C;
+  --bg-soft: #fdfaf5; /* Creamy background from image */
+  --text-main: #1a1a1a;
+  --text-muted: #666;
+  --border-color: #e0e0e0;
+}
+
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-soft);
+  padding: 20px;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+.auth-card {
+  background: white;
+  padding: 40px;
+  border-radius: 24px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+}
+
+.auth-card h1 {
+  margin: 0 0 10px 0;
+  font-size: 28px;
+  color: var(--text-main);
+}
+
+.auth-card p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.input-field {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.auth-button {
+  width: 100%;
+  padding: 14px;
+  background-color: #FEC288; 
+  border: none;
+  border-radius: 8px;
+  color: var(--text-main);
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+
+.auth-button:hover {
+  background-color: var(--primary);
+  color: white;
+}
+
+.auth-footer {
+  margin-top: 25px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.auth-link {
+  color: var(--text-main);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Horizontally centers children */
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* Ensures the cropper doesn't overflow on small screens */
+.cropper-wrapper, .settings-card {
+  width: 100%;
+  max-width: 600px;
+  box-sizing: border-box;
+}

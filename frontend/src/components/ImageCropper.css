@@ -1,0 +1,65 @@
+.cropper-wrapper {
+  width: 100%;
+}
+
+.crop-container {
+  position: relative;
+  width: 100%;
+  height: 360px;
+  background: var(--muted);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.cropper-controls {
+  padding: 16px 0;
+}
+
+.zoom-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.zoom-btn {
+  background: var(--muted);
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-btn:hover {
+  background: var(--border);
+  color: var(--foreground);
+}
+
+.zoom-range {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--muted);
+  border-radius: var(--radius-xl);
+  outline: none;
+}
+
+.zoom-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: var(--transition-fast);
+}
+
+.zoom-range::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
