@@ -9,11 +9,15 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
-    
-    if (token) {
+
+    // List endpoints that MUST NOT have an Authorization header
+    const authEndpoints = ['/auth/login', '/auth/register'];
+    const isAuthRequest = authEndpoints.some(endpoint => config.url?.includes(endpoint));
+
+    if (token && !isAuthRequest) {
         config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config;
 });
 
