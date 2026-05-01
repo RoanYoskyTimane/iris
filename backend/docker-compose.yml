@@ -1,0 +1,11 @@
+services:
+  app:
+    # Build using the Dockerfile in the current directory
+    build: .
+    # Name of the image to be created
+    image: image-processing-service:latest
+    ports:
+      - "8080:8080"
+    # This automatically looks for a file named '.env' in this directory
+    env_file:
+      - .env
