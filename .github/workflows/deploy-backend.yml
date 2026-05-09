@@ -46,7 +46,7 @@ jobs:
       - name: Remote Docker Deploy
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd ~/kinetic
+            cd ~/iris
             # Gracefully stop the old container if it exists
             docker compose down || true
             # Start the new version
