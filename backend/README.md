@@ -2,7 +2,7 @@
 
 The backend of Iris is a robust Spring Boot application that handles image storage, metadata extraction, and complex image transformations.
 
-## 🛠️ Technologies
+## Technologies
 
 - **Language**: Java 21
 - **Framework**: Spring Boot 4.0.1
@@ -14,7 +14,7 @@ The backend of Iris is a robust Spring Boot application that handles image stora
 - **Rate Limiting**: [Bucket4j](https://github.com/bucket4j/bucket4j)
 - **Build Tool**: Maven
 
-## 📂 Key Components
+## Key Components
 
 - **Controllers**:
   - `AuthenticationController`: Handles user registration and login.
@@ -25,7 +25,7 @@ The backend of Iris is a robust Spring Boot application that handles image stora
   - `JwtService`: Manages token generation and validation.
   - `RateLimiteService`: Implements user-based rate limiting.
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Authentication
 - `POST /api/v1/auth/register`: Create a new account.
@@ -38,7 +38,7 @@ The backend of Iris is a robust Spring Boot application that handles image stora
 - `GET /api/v1/images`: List user images (paginated).
 - `DELETE /api/v1/images/{key}`: Remove an image.
 
-## ⚙️ Configuration
+## Configuration
 
 The application requires an `.env` file in the root of the `backend` folder with the following variables:
 
@@ -60,7 +60,7 @@ R2_BUCKET_NAME=your_bucket_name
 R2_PUBLIC_URL=your_public_url
 ```
 
-## 🚀 Running the App
+## Running the App
 
 ```bash
 ./mvnw spring-boot:run

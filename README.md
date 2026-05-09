@@ -2,7 +2,7 @@
 
 Iris is a powerful, full-stack image processing service inspired by platforms like Cloudinary. It allows users to upload, store, and transform images on the fly with a simple API and an intuitive dashboard.
 
-## 🌟 Features
+## Features
 
 - **User Authentication**: Secure signup and login system using JWT.
 - **Image Upload**: Efficiently upload images to Cloudflare R2 / S3 storage.
@@ -16,14 +16,14 @@ Iris is a powerful, full-stack image processing service inspired by platforms li
 - **Rate Limiting**: Integrated rate limiting (e.g., 2 uploads per day for free users).
 - **Responsive Dashboard**: A modern React-based interface to manage and transform your images.
 
-## 🏗️ Project Structure
+## Project Structure
 
 The project is divided into two main parts:
 
 - **[Backend](backend/)**: A Spring Boot application providing a RESTful API.
 - **[Frontend](frontend/)**: A modern React application built with Vite and TypeScript.
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -51,11 +51,11 @@ The project is divided into two main parts:
    - Install dependencies: `npm install`
    - Run the development server: `npm run dev`
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Backend**: Java 21, Spring Boot, Spring Security (JWT), Spring Data JPA, PostgreSQL, Cloudflare R2/S3 SDK, Thumbnailator, Bucket4j.
 - **Frontend**: React 19, TypeScript, Vite, Framer Motion, Axios, Lucide React, React Easy Crop.
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
