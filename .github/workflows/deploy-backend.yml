@@ -1,0 +1,54 @@
+name: Build and Deploy Backend
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'backend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build JAR
+        working-directory: ./backend
+        run: ./mvnw clean package -DskipTests
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Transfer Files via SCP
+        run: |
+          # Create target directory on server
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "mkdir -p ~/iris/target"
+          
+          # Transfer the JAR
+          scp backend/target/*.jar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:~/iris/target/
+          
+          # Transfer Docker and Compose files
+          scp backend/Dockerfile backend/docker-compose.yml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:~/iris/
+
+      - name: Remote Docker Deploy
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            cd ~/kinetic
+            # Gracefully stop the old container if it exists
+            docker compose down || true
+            # Start the new version
+            docker compose up -d --build
+          EOF
