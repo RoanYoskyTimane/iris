@@ -17,7 +17,7 @@ export default function Navbar() {
           <div className="logo-icon">
             <ImageIcon size={20} />
           </div>
-          <span className="logo-text">PixelProcessor</span>
+          <span className="logo-text">Iris</span>
         </div>
         
         <div className="navbar-actions">
