@@ -1,13 +1,9 @@
-# Stage 1: Build
-FROM eclipse-temurin:21-jdk-jammy AS build
-WORKDIR /app
-COPY . .
-RUN ./mvnw clean package -DskipTests
+FROM eclipse-temurin:21-jdk
 
-# Stage 2: Run
-FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-# Only copy the final jar from the build stage
-COPY --from=build /app/target/*.jar app.jar
+
+COPY /target/image-processing-service-0.0.1-SNAPSHOT.jar.jar app.jar
+
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
